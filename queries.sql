@@ -1,62 +1,96 @@
--- Total revenue generated
-SELECT SUM(quantity * price) AS total_revenue
-FROM sales;
 SELECT 
-    DATE_TRUNC('month', order_date) AS month,
-    SUM(quantity * price) AS monthly_revenue
+    SUM(Quantity * Amount) AS total_revenue         --Total Revenue (Amount × Quantity)
+FROM sales; 
+
+
+SELECT 
+    SUM(Profit) AS total_profit                 --Total Profit
+FROM sales;
+
+
+
+SELECT 
+    DATE_FORMAT(`Order Date`, '%Y-%m') AS month,     --Monthly Revenue
+    SUM(Quantity * Amount) AS monthly_revenue                 
 FROM sales
 GROUP BY month
 ORDER BY month;
--- Top 5 customers by total revenue
+
+
 SELECT 
-    customer_id,
-    SUM(quantity * price) AS total_revenue
+    CustomerName,
+    SUM(Quantity * Amount) AS total_revenue          --Top 5 Customers by Total Revenue
 FROM sales
-GROUP BY customer_id
+GROUP BY CustomerName
 ORDER BY total_revenue DESC
 LIMIT 5;
--- Top 5 products by revenue
+
+
+
 SELECT 
-    product_id,
-    SUM(quantity * price) AS product_revenue
+    `Sub-Category`,
+    SUM(Quantity * Amount) AS subcategory_revenue       --. Top 5 Sub-Categories by Revenue
 FROM sales
-GROUP BY product_id
-ORDER BY product_revenue DESC
+GROUP BY `Sub-Category`
+ORDER BY subcategory_revenue DESC
 LIMIT 5;
--- Average order value
+
+
+
+
 SELECT 
     AVG(order_total) AS avg_order_value
 FROM (
-    SELECT 
-        order_id,
-        SUM(quantity * price) AS order_total
+    SELECT                                            --Average Order Value
+        `Order ID`,
+        SUM(Quantity * Amount) AS order_total
     FROM sales
-    GROUP BY order_id
+    GROUP BY `Order ID`
 ) t;
--- Revenue contribution percentage per customer
+
+
+
+
 SELECT 
-    customer_id,
-    SUM(quantity * price) AS customer_revenue,
-    ROUND(
-        100.0 * SUM(quantity * price) 
-        / SUM(SUM(quantity * price)) OVER (), 2
+    CustomerName,
+    SUM(Quantity * Amount) AS customer_revenue,
+    ROUND(                                                  --Revenue Contribution % per Customer
+        100 * SUM(Quantity * Amount) 
+        / SUM(SUM(Quantity * Amount)) OVER (), 2
     ) AS revenue_percentage
 FROM sales
-GROUP BY customer_id
+GROUP BY CustomerName
 ORDER BY customer_revenue DESC;
--- Rank customers based on revenue
+
+
+
+
 SELECT 
-    customer_id,
-    SUM(quantity * price) AS total_revenue,
-    RANK() OVER (ORDER BY SUM(quantity * price) DESC) AS revenue_rank
-FROM sales
-GROUP BY customer_id;
--- Customers with revenue greater than average
+    CustomerName,
+    SUM(Quantity * Amount) AS total_revenue,
+    RANK() OVER (ORDER BY SUM(Quantity * Amount) DESC) AS revenue_rank
+FROM sales                                                                           --Rank Customers Based on Revenue
+GROUP BY CustomerName;
+
+
+
+
 SELECT 
-    customer_id,
-    SUM(quantity * price) AS total_revenue
+    CustomerName,
+    SUM(Quantity * Amount) AS total_revenue
 FROM sales
-GROUP BY customer_id
-HAVING SUM(quantity * price) > (
-    SELECT AVG(quantity * price) FROM sales
+GROUP BY CustomerName
+HAVING SUM(Quantity * Amount) >                                 --Customers with Revenue Greater Than Average
+(
+    SELECT AVG(order_total)
+    FROM (
+        SELECT 
+            `Order ID`,
+            SUM(Quantity * Amount) AS order_total
+        FROM sales
+        GROUP BY `Order ID`
+    ) x
 );
+
+
+
